@@ -496,6 +496,7 @@ async def add_payment(
 
 
 # ---------- Invitations ----------
+# ---------- Invitations ----------
 @app.get("/invitations", response_class=HTMLResponse)
 async def invitations_page(
     request: Request,
@@ -503,22 +504,29 @@ async def invitations_page(
     db: Session = Depends(get_db),
 ):
     pending = crud.get_pending_invitations_for_email(db, user.email)
-    # Enrich with pool name
+
     inv_data = []
+
     for inv in pending:
         pool = crud.get_pool(db, inv.pool_id)
-        inv_data.append({"invitation": inv, "pool_name": pool.name if pool else "Unknown"})
+
+        inv_data.append({
+            "invitation": inv,
+            "pool_name": pool.name if pool else "Unknown",
+        })
+
+    print("Logged-in email:", user.email)
+    print("Pending invitations:", pending)
+
     return templates.TemplateResponse(
-        "invitations.html",
-        {
-            "request": request,
+        request=request,
+        name="invitations.html",
+        context={
             "user": user,
             "invitations": inv_data,
             "flashes": parse_flash(request),
         },
     )
-
-
 @app.post("/pools/{pool_id}/invite")
 async def send_invitation(
     pool_id: int,

@@ -233,14 +233,13 @@ def create_invitation(
     return inv
 
 
-def get_pending_invitations_for_email(db: Session, email: str) -> List[models.Invitation]:
+def get_pending_invitations_for_email(db: Session, email: str):
     return (
         db.query(models.Invitation)
         .filter(
-            models.Invitation.invited_email == email.lower(),
-            models.Invitation.status == InvitationStatus.pending,
+            models.Invitation.invited_email == email.strip().lower(),
+            models.Invitation.status == models.InvitationStatus.pending,
         )
-        .order_by(models.Invitation.created_at.desc())
         .all()
     )
 
