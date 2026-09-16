@@ -39,7 +39,33 @@ app = FastAPI(title="GiftPool", description="Collaborative shared-expense gift p
 # Paths
 BASE_DIR = Path(__file__).resolve().parent
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
-templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+class CompatibleTemplates(Jinja2Templates):
+    """Support both legacy and modern TemplateResponse call signatures."""
+
+    def TemplateResponse(self, *args, **kwargs):
+        # Legacy form:
+        # TemplateResponse("page.html", {"request": request, ...}, status_code=...)
+        if args and isinstance(args[0], str):
+            name = args[0]
+            context = dict(args[1]) if len(args) > 1 else dict(kwargs.pop("context", {}))
+            request = context.pop("request", None)
+
+            if request is None:
+                request = kwargs.pop("request", None)
+
+            return super().TemplateResponse(
+                request=request,
+                name=name,
+                context=context,
+                **kwargs,
+            )
+
+        # Modern form:
+        # TemplateResponse(request=request, name="page.html", context={...})
+        return super().TemplateResponse(*args, **kwargs)
+
+
+templates = CompatibleTemplates(directory=str(BASE_DIR / "templates"))
 
 
 # ---------- Helpers ----------
@@ -86,8 +112,13 @@ async def register_page(request: Request, user=Depends(get_optional_user)):
     if user:
         return RedirectResponse("/dashboard", status_code=303)
     return templates.TemplateResponse(
-        "register.html",
-        {"request": request, "user": None, "flashes": parse_flash(request), "error": None},
+        request=request,
+        name="register.html",
+        context={
+            "user": None,
+            "flashes": parse_flash(request),
+            "error": None,
+        },
     )
 
 
@@ -157,10 +188,14 @@ async def login_page(request: Request, user=Depends(get_optional_user)):
     if user:
         return RedirectResponse("/dashboard", status_code=303)
     return templates.TemplateResponse(
-        "login.html",
-        {"request": request, "user": None, "flashes": parse_flash(request), "error": None},
-    )
-
+    request=request,
+    name="login.html",
+    context={
+        "user": None,
+        "flashes": parse_flash(request),
+        "error": None,
+    },
+)
 
 @app.post("/login", response_class=HTMLResponse)
 async def login(
