@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Invitations — GiftPool{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Pending Invitations</h1>
+</div>
+
+{% if invitations %}
+<div class="card-list">
+  {% for item in invitations %}
+  <div class="card invitation-card">
+    <h3>{{ item.pool_name }}</h3>
+    <p class="meta">Invited as: {{ item.invitation.invited_email }}</p>
+    <p class="meta">Sent: {{ item.invitation.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+    <div class="actions-row">
+      <form method="post" action="/invitations/{{ item.invitation.id }}/accept" style="display:inline">
+        <button type="submit" class="btn-primary">Accept</button>
+      </form>
+      <form method="post" action="/invitations/{{ item.invitation.id }}/reject" style="display:inline">
+        <button type="submit" class="btn-outline">Reject</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card empty-state">
+  <p>You have no pending invitations.</p>
+  <a href="/dashboard" class="btn-outline">Back to Dashboard</a>
+</div>
+{% endif %}
+{% endblock %}

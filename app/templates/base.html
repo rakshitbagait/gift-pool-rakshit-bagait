@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}GiftPool{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand">
+      <a href="{% if user %}/dashboard{% else %}/{% endif %}">🎁 GiftPool</a>
+    </div>
+    <div class="nav-links">
+      {% if user %}
+        <a href="/dashboard">Dashboard</a>
+        <a href="/pools/create">Create Pool</a>
+        <a href="/invitations">Invitations</a>
+        <span class="nav-user">{{ user.name }}</span>
+        <a href="/logout" class="btn-outline">Logout</a>
+      {% else %}
+        <a href="/login">Login</a>
+        <a href="/register" class="btn-primary">Register</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <main class="container">
+    {% if flashes %}
+      {% for f in flashes %}
+        <div class="flash flash-{{ f.category }}">{{ f.message }}</div>
+      {% endfor %}
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <p>GiftPool — Collaborative shared-expense MVP</p>
+  </footer>
+</body>
+</html>

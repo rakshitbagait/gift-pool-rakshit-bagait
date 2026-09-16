@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Create Pool — GiftPool{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Create a Gift Pool</h1>
+</div>
+
+<div class="card form-card">
+  {% if error %}
+    <div class="flash flash-error">{{ error }}</div>
+  {% endif %}
+  <form method="post" action="/pools/create" class="form">
+    <div class="form-group">
+      <label for="name">Pool Name</label>
+      <input type="text" id="name" name="name" required placeholder="e.g. Birthday Gift for Rahul">
+    </div>
+    <div class="form-group">
+      <label for="target_amount">Target Amount (₹)</label>
+      <input type="number" id="target_amount" name="target_amount" required min="0.01" step="0.01" placeholder="5000.00">
+    </div>
+    <div class="form-group">
+      <label for="member_emails">Initial Members (optional)</label>
+      <input type="text" id="member_emails" name="member_emails" placeholder="email1@example.com, email2@example.com">
+      <small class="hint">Comma-separated emails of registered users. You will be the organiser.</small>
+    </div>
+    <button type="submit" class="btn-primary">Create Pool</button>
+    <a href="/dashboard" class="btn-outline">Cancel</a>
+  </form>
+</div>
+{% endblock %}
